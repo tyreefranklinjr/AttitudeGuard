@@ -1,68 +1,84 @@
-# AttitudeGuard upstream reaction-wheel baseline
+# Baseline reference
 
-Baseline name: scenarioAttitudeFeedbackRW, voltage interface, no jitter
-Date: 2026-10-06 (America/New_York)
-Operating system: macOS 26.5.1
-CPU architecture: arm64
-Python executable and version: /Users/tyreefranklinjr/AttitudeGuard/.venv/bin/python; 3.14.4
-Environment location: /Users/tyreefranklinjr/AttitudeGuard/.venv
-Environment activation command: `source /Users/tyreefranklinjr/AttitudeGuard/.venv/bin/activate`
-Basilisk version and module location: 2.12.0; /Users/tyreefranklinjr/AttitudeGuard/.venv/lib/python3.14/site-packages/Basilisk/__init__.py
-Compiler version: Apple clang version 21.0.0 (clang-2100.1.1.101)
-Full metadata: environment.txt. Dependency snapshot: requirements-baseline.txt.
+**Verified:** October 6, 2026 · **Name:** reaction-wheel attitude feedback, voltage interface
 
-## Source and launch
+Both the original and saved example completed without an unhandled exception. Figures were exported and checked for readable curves and labels.
 
-Upstream attribution: Autonomous Vehicle Systems Lab, University of Colorado at Boulder; ISC license retained in the script.
-Upstream example source: https://github.com/AVSLab/basilisk/blob/v2.12.0/examples/scenarioAttitudeFeedbackRW.py (source attribution; local file not compared against this tag).
-Original example path: /Users/tyreefranklinjr/AttitudeGuard/examples/scenarioAttitudeFeedbackRW.py
-Saved baseline path: /Users/tyreefranklinjr/AttitudeGuard/sim/baseline/scenarioAttitudeFeedbackRW.py
-SHA-256 (both files): aed4ac66131236f406aea65636329b97760e34c25b8de0b2e306602cd6574252
-Working directory verified today: /Users/tyreefranklinjr/AttitudeGuard
-Exact interactive launch command:
+## Launch
 
 ```sh
-cd /Users/tyreefranklinjr/AttitudeGuard
+cd ~/AttitudeGuard
 source .venv/bin/activate
-python examples/scenarioAttitudeFeedbackRW.py
+python sim/baseline/scenarioAttitudeFeedbackRW.py
 ```
 
-Saved copy launch: `python sim/baseline/scenarioAttitudeFeedbackRW.py` from the same directory with the same environment active.
+Original launch: `python examples/scenarioAttitudeFeedbackRW.py` from the same directory.
+Automatic verification: `python docs/verify_baseline.py`.
 
-show_plots: True
-useJitterSimple: False
-useRWVoltageIO: True
-Simulation duration: 10 minutes / 600 seconds (line 403).
-Dynamics/flight-software time steps: shared simTask, 0.1 seconds (lines 411–412).
-Random seed: no seed or stochastic-input configuration appears in this example; SimpleNav is instantiated without noise configuration. Library-internal defaults were not independently audited.
+## Configuration
 
-## Sprint 1 verification
+| Setting | Verified value |
+| :--- | :--- |
+| `show_plots` | `True` |
+| `useJitterSimple` | `False` |
+| `useRWVoltageIO` | `True` |
+| Duration | 600 seconds / 10 minutes — script line 403 |
+| Dynamics and flight software | Shared task, 0.1-second step — lines 411–412 |
+| Stochastic inputs | No seed or noise configured in the example; library defaults not independently audited |
+| Python / Basilisk | 3.14.4 / 2.12.0 |
+| Platform / compiler | macOS 26.5.1, arm64 / Apple Clang 21.0.0 |
 
-PASS: intended isolated .venv interpreter imports Basilisk; pip belongs to that environment; architecture and versions match the supplied notes.
-PASS: original example and preserved copy each completed without an unhandled exception and produced five exported figures. Evidence: ../results/baseline/run-original.log and run-copy.log.
-The automatic verification executes each script's actual __main__ entry point with its flags unchanged. It uses Matplotlib Agg and exports figures when plt.show is called, so interactive window display was not tested. The exact verification harness is verify_baseline.py; launch it with `python docs/verify_baseline.py` from the project directory.
-Yesterday's working directory, exact command and settings are unknown: today's values are verified from the current script, not terminal history. Existing results/Figure_4.png and Figure_5.png are retained.
+[Full environment record](environment.txt) · [Dependency snapshot](requirements-baseline.txt)
 
-## Sprint 2 control path
+## Active control path
 
-- SimpleNav receives scObject.scStateOutMsg (line 620), producing simulated navigation attitude/rate. attTrackingError combines that navigation with inertial3D's reference (lines 621–622).
-- mrpControl receives attitude/rate guidance error, spacecraft inertia/configuration, wheel geometry/configuration and simulated wheel speeds (lines 623–626). It produces cmdTorqueOutMsg, the requested body control torque. This is the upstream MRP feedback controller.
-- rwMotorTorqueObj receives body torque and wheel configuration (lines 627–628). With all three control axes enabled, it allocates the body torque into individual wheel motor torque commands.
-- Voltage conversion is enabled. rwMotorVoltage converts requested wheel torques to voltages using wheel parameters (lines 630–631); motorVoltageInterface receives those voltages (line 632), applies configured 0.02 Nm/V gains, and outputs motor torques to rwStateEffector (line 633). The direct torque branch at line 635 is inactive.
-- rwFactory.addToSpacecraft attaches rwStateEffector to scObject (line 474). Motor torques accelerate wheels; their coupled angular momentum changes exert reaction torques on spacecraft attitude dynamics.
-- Navigation and wheel-speed feedback currently come from the simulated state and upstream modules; inertia, wheel parameters and inertial reference are configured in this example. Original sensor-fault handling is not present.
+Line references apply to the [saved script](../sim/baseline/scenarioAttitudeFeedbackRW.py).
 
-## Figures
+| Stage | Input → output | Lines |
+| :--- | :--- | :--- |
+| Navigation | Simulated spacecraft state → attitude and rate | 620 |
+| Tracking error | Navigation + inertial reference → guidance error | 621–622 |
+| `mrpControl` | Guidance error, inertia, wheel parameters and speeds → body torque | 623–626 |
+| `rwMotorTorqueObj` | Body torque + wheel geometry → individual motor torques | 627–628 |
+| Voltage conversion | Wheel torques → voltages → applied motor torques, with 0.02 Nm/V interface gain | 630–633; gain at 485 |
+| `rwStateEffector` | Motor torque → wheel acceleration and spacecraft reaction torque | 633; attachment at 474 |
 
-Time axis on each figure: minutes.
-- attitude-rate.png: attitude tracking error, dimensionless MRP components (not degrees).
-- wheel-response.png: requested/applied wheel motor torque, Nm.
-- body-rate.png: rate tracking error, rad/s.
-- wheel-speed.png: wheel speed, RPM.
-- wheel-voltage.png: wheel voltage, V.
+The direct-torque connection at line 635 is inactive. Navigation and wheel-speed feedback come from the simulation; the reference, inertia, and wheel parameters are configured by the example.
 
-## What this proves and remaining questions
+## Saved evidence
 
-This baseline establishes that the upstream Basilisk simulation runs in my isolated environment and that its voltage-interface reaction-wheel control path produces inspectable results. It does not yet demonstrate my original quaternion controller, sensor-fault detection or recovery supervisor.
+All plots use **time in minutes** on the horizontal axis.
 
-Unknown: yesterday's exact invocation; initial installation procedure; local example differences from the upstream release; clean-machine reproduction. The dependency snapshot records this environment, not a verified fresh installation recipe.
+| Figure | Vertical axis |
+| :--- | :--- |
+| [Attitude error](../results/baseline/attitude-rate.png) | Dimensionless MRP components |
+| [Wheel torque](../results/baseline/wheel-response.png) | Requested and applied torque, Nm |
+| [Body rate](../results/baseline/body-rate.png) | Rate tracking error, rad/s |
+| [Wheel speed](../results/baseline/wheel-speed.png) | RPM |
+| [Wheel voltage](../results/baseline/wheel-voltage.png) | V |
+
+[Original run log](../results/baseline/run-original.log) · [Saved-copy run log](../results/baseline/run-copy.log)
+
+The verification script preserves the entry-point flags and uses Matplotlib Agg to export figures at `plt.show()`. Interactive windows were not tested. Earlier `results/Figure_4.png` and `Figure_5.png` remain available.
+
+## Scope and open questions
+
+This verifies the upstream simulation setup. Original quaternion control, sensor-fault detection, and recovery supervision remain future work.
+
+Still unknown: the previous day's exact invocation, original installation procedure, differences from the upstream release, and fresh-machine reproduction. The dependency snapshot records this working environment.
+
+<details>
+<summary>Source attribution and exact local paths</summary>
+
+- Author: Autonomous Vehicle Systems Lab, University of Colorado at Boulder. ISC license retained.
+- [Upstream example](https://github.com/AVSLab/basilisk/blob/v2.12.0/examples/scenarioAttitudeFeedbackRW.py): attribution only; local source not compared against the release tag.
+- Project / working directory: `/Users/tyreefranklinjr/AttitudeGuard`
+- Original: `/Users/tyreefranklinjr/AttitudeGuard/examples/scenarioAttitudeFeedbackRW.py`
+- Saved copy: `/Users/tyreefranklinjr/AttitudeGuard/sim/baseline/scenarioAttitudeFeedbackRW.py`
+- Environment: `/Users/tyreefranklinjr/AttitudeGuard/.venv`
+- Interpreter: `/Users/tyreefranklinjr/AttitudeGuard/.venv/bin/python`
+- Activation: `source /Users/tyreefranklinjr/AttitudeGuard/.venv/bin/activate`
+- Basilisk module: `/Users/tyreefranklinjr/AttitudeGuard/.venv/lib/python3.14/site-packages/Basilisk/__init__.py`
+- Both scripts' verified SHA-256: `aed4ac66131236f406aea65636329b97760e34c25b8de0b2e306602cd6574252`
+
+</details>
