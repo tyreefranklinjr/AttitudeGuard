@@ -1,0 +1,26 @@
+Verified: 2026-10-06 (America/New_York)
+OS: macOS 26.5.1
+Architecture: arm64
+Python: 3.14.4 (main, Apr  7 2026, 13:13:20) [Clang 21.0.0 (clang-2100.0.123.102)]
+Environment location: /Users/tyreefranklinjr/AttitudeGuard/.venv
+Activation command: source /Users/tyreefranklinjr/AttitudeGuard/.venv/bin/activate
+Python interpreter path: /Users/tyreefranklinjr/AttitudeGuard/.venv/bin/python
+Basilisk package location: /Users/tyreefranklinjr/AttitudeGuard/.venv/lib/python3.14/site-packages/Basilisk/__init__.py
+
+pip 26.2.1 from /Users/tyreefranklinjr/AttitudeGuard/.venv/lib/python3.14/site-packages/pip (python 3.14)
+
+Name: bsk
+Version: 2.12.0
+Summary: Basilisk: an Astrodynamics Simulation Framework
+Home-page: https://avslab.github.io/basilisk/
+Author: 
+Author-email: 
+License-Expression: ISC
+Location: /Users/tyreefranklinjr/AttitudeGuard/.venv/lib/python3.14/site-packages
+Requires: bokeh, colorama, matplotlib, numpy, pandas, pillow, pooch, protobuf, requests, sgp4, tqdm
+Required-by: 
+
+Apple clang version 21.0.0 (clang-2100.1.1.101)
+Target: arm64-apple-darwin25.5.0
+Thread model: posix
+InstalledDir: /Library/Developer/CommandLineTools/usr/bin

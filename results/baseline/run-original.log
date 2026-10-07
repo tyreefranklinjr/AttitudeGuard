@@ -1,0 +1,4 @@
+Original example: /Users/tyreefranklinjr/AttitudeGuard/examples/scenarioAttitudeFeedbackRW.py
+Working directory: /Users/tyreefranklinjr/AttitudeGuard
+Entry point flags: True, False, True; Agg rendering with figure export in plt.show
+PASS: original simulation completed without an unhandled exception.

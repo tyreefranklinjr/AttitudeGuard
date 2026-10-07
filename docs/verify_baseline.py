@@ -1,28 +1,61 @@
-# AttitudeGuard upstream reaction-wheel baseline
+from pathlib import Path
+import os, sys, runpy, shutil, subprocess, platform, hashlib, contextlib
+root=Path('/Users/tyreefranklinjr/AttitudeGuard')
+for rel in ['docs','sim/baseline','results/baseline']:
+    (root/rel).mkdir(parents=True,exist_ok=True)
+os.environ['MPLBACKEND']='Agg'
+os.environ['MPLCONFIGDIR']='/private/tmp/attitudeguard-mpl'
+import matplotlib.pyplot as plt
+import Basilisk
+original=root/'examples/scenarioAttitudeFeedbackRW.py'
+copy=root/'sim/baseline/scenarioAttitudeFeedbackRW.py'
+shutil.copy2(original,copy)
+def save_figures(*args,**kwargs):
+    for number,name in [(1,'attitude-rate.png'),(2,'wheel-response.png'),(3,'body-rate.png'),(4,'wheel-speed.png'),(5,'wheel-voltage.png')]:
+        if plt.fignum_exists(number):
+            plt.figure(number).savefig(root/'results/baseline'/name,dpi=160,bbox_inches='tight')
+plt.show=save_figures
+os.chdir(root)
+sys.path.insert(0,str(original.parent))
+with (root/'results/baseline/run-original.log').open('w') as log,contextlib.redirect_stdout(log),contextlib.redirect_stderr(log):
+    print('Original example:',original)
+    print('Working directory:',root)
+    print('Entry point flags: True, False, True; Agg rendering with figure export in plt.show')
+    runpy.run_path(str(original),run_name='__main__')
+    print('PASS: original simulation completed without an unhandled exception.')
+with (root/'results/baseline/run-copy.log').open('w') as log,contextlib.redirect_stdout(log),contextlib.redirect_stderr(log):
+    runpy.run_path(str(copy),run_name='__main__')
+    print('PASS: preserved baseline completed without an unhandled exception.')
+compiler=subprocess.check_output(['clang++','--version'],text=True)
+metadata=subprocess.check_output([sys.executable,'-m','pip','show','bsk'],text=True)
+pip=subprocess.check_output([sys.executable,'-m','pip','--version'],text=True)
+(root/'docs/environment.txt').write_text(f'Verified: 2026-10-06 (America/New_York)\nOS: macOS {platform.mac_ver()[0]}\nArchitecture: {platform.machine()}\nPython: {sys.version}\nEnvironment location: {root}/.venv\nActivation command: source {root}/.venv/bin/activate\nPython interpreter path: {sys.executable}\nBasilisk package location: {Basilisk.__file__}\n\n{pip}\n{metadata}\n{compiler}')
+(root/'docs/requirements-baseline.txt').write_text(subprocess.check_output([sys.executable,'-m','pip','freeze'],text=True))
+(root/'docs/baseline.md').write_text(f'''# AttitudeGuard upstream reaction-wheel baseline
 
 Baseline name: scenarioAttitudeFeedbackRW, voltage interface, no jitter
 Date: 2026-10-06 (America/New_York)
-Operating system: macOS 26.5.1
-CPU architecture: arm64
-Python executable and version: /Users/tyreefranklinjr/AttitudeGuard/.venv/bin/python; 3.14.4
-Environment location: /Users/tyreefranklinjr/AttitudeGuard/.venv
-Environment activation command: `source /Users/tyreefranklinjr/AttitudeGuard/.venv/bin/activate`
-Basilisk version and module location: 2.12.0; /Users/tyreefranklinjr/AttitudeGuard/.venv/lib/python3.14/site-packages/Basilisk/__init__.py
-Compiler version: Apple clang version 21.0.0 (clang-2100.1.1.101)
+Operating system: macOS {platform.mac_ver()[0]}
+CPU architecture: {platform.machine()}
+Python executable and version: {sys.executable}; {platform.python_version()}
+Environment location: {root}/.venv
+Environment activation command: `source {root}/.venv/bin/activate`
+Basilisk version and module location: 2.12.0; {Basilisk.__file__}
+Compiler version: {compiler.splitlines()[0]}
 Full metadata: environment.txt. Dependency snapshot: requirements-baseline.txt.
 
 ## Source and launch
 
 Upstream attribution: Autonomous Vehicle Systems Lab, University of Colorado at Boulder; ISC license retained in the script.
 Upstream example source: https://github.com/AVSLab/basilisk/blob/v2.12.0/examples/scenarioAttitudeFeedbackRW.py (source attribution; local file not compared against this tag).
-Original example path: /Users/tyreefranklinjr/AttitudeGuard/examples/scenarioAttitudeFeedbackRW.py
-Saved baseline path: /Users/tyreefranklinjr/AttitudeGuard/sim/baseline/scenarioAttitudeFeedbackRW.py
-SHA-256 (both files): aed4ac66131236f406aea65636329b97760e34c25b8de0b2e306602cd6574252
-Working directory verified today: /Users/tyreefranklinjr/AttitudeGuard
+Original example path: {original}
+Saved baseline path: {copy}
+SHA-256 (both files): {hashlib.sha256(original.read_bytes()).hexdigest()}
+Working directory verified today: {root}
 Exact interactive launch command:
 
 ```sh
-cd /Users/tyreefranklinjr/AttitudeGuard
+cd {root}
 source .venv/bin/activate
 python examples/scenarioAttitudeFeedbackRW.py
 ```
@@ -66,3 +99,8 @@ Time axis on each figure: minutes.
 This baseline establishes that the upstream Basilisk simulation runs in my isolated environment and that its voltage-interface reaction-wheel control path produces inspectable results. It does not yet demonstrate my original quaternion controller, sensor-fault detection or recovery supervisor.
 
 Unknown: yesterday's exact invocation; initial installation procedure; local example differences from the upstream release; clean-machine reproduction. The dependency snapshot records this environment, not a verified fresh installation recipe.
+''')
+harness_destination = root/'docs/verify_baseline.py'
+if Path(__file__).resolve() != harness_destination.resolve():
+    shutil.copy2(__file__, harness_destination)
+print('PASS: both runs completed; environment, configuration, dependency snapshot and figures saved.')
