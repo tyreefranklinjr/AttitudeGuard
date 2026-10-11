@@ -1,0 +1,4 @@
+PASS — input 0.0: got 0.0, expected 0.0
+PASS — input -1.25: got -2.5, expected -2.5
+PASS — input 3.5: got 7.0, expected 7.0
+PASS - all three scalar checks
