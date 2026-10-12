@@ -1,9 +1,5 @@
-from typing import Any
-
 import ctypes
 from pathlib import Path
-
-from Basilisk.topLevelModules.pyswice import cyllat_c
 
 project_dir = Path(__file__).resolve().parent.parent
 library_path = project_dir / "cpp" / "libprobe.dylib"
@@ -61,26 +57,10 @@ for sim_time in [0.0, 0.1, 0.2]:
 
     print(f"PASS - identical input produces identical fields at {sim_time} s")
 
-# output_record = ProbeRecord()
-
-# status = library.copy_probe_record(
-#     ctypes.byref(input_record),
-#     ctypes.byref(output_record),
-# )
-
-# assert status == 0, f"FAIL — record copy returned status {status}"
-# assert output_record.sim_time_s == input_record.sim_time_s
-# assert list(output_record.gyro_rad_s) == list(input_record.gyro_rad_s)
-# assert output_record.sequence == input_record.sequence
-
-# print("PASS — record copy: time=0.1, gyro=[0.01, -0.02, 0.03], sequence=7")
-
-# status = library.copy_probe_record(
-#     None,
-#     ctypes.byref(output_record),
-# )
-# assert status == 1, f"FAIL — null input returned status {status}"
-# print("PASS — null input returns status 1")
+output_record = ProbeRecord()
+status = library.copy_probe_record(None, ctypes.byref(output_record))
+assert status == 1, f"FAIL — null input returned status {status}"
+print("PASS — null input returns status 1")
 
 status = library.copy_probe_record(
     ctypes.byref(input_record),
@@ -112,15 +92,15 @@ python_time_offset = ProbeRecord.sim_time_s.offset
 python_gyro_offset = ProbeRecord.gyro_rad_s.offset
 python_sequence_offset = ProbeRecord.sequence.offset
 
-assert cpp_size == python_size, f"Size error: C++ - {cpp_size}, Py - {python_size}"
+assert cpp_size == python_size, f"FAIL — Size error: C++ - {cpp_size}, Py - {python_size}"
 print(f"Size: PASS - c++: {cpp_size}, python: {python_size}")
-assert cpp_alignment == python_alignment, f"Alignment error: C++ - {cpp_alignment}, Py - {python_alignment}"
+assert cpp_alignment == python_alignment, f"FAIL — Alignment error: C++ - {cpp_alignment}, Py - {python_alignment}"
 print(f"Alignment: PASS - c++: {cpp_alignment}, python: {python_alignment}")
-assert cpp_time_offset == python_time_offset, f"Time error: C++ - {cpp_time_offset}, Py - {python_time_offset}"
+assert cpp_time_offset == python_time_offset, f"FAIL — Time error: C++ - {cpp_time_offset}, Py - {python_time_offset}"
 print(f"Time: PASS - c++: {cpp_time_offset}, python: {python_time_offset}")
-assert cpp_gyro_offset == python_gyro_offset, f"Gyro error: C++ - {cpp_gyro_offset}, Py - {python_gyro_offset}"
+assert cpp_gyro_offset == python_gyro_offset, f"FAIL — Gyro error: C++ - {cpp_gyro_offset}, Py - {python_gyro_offset}"
 print(f"Gyro: PASS - c++: {cpp_gyro_offset}, python: {python_gyro_offset}")
-assert cpp_sequence_offset == python_sequence_offset, f"Sequence error: C++ - {cpp_sequence_offset}, Py - {python_sequence_offset}"
+assert cpp_sequence_offset == python_sequence_offset, f"FAIL — Sequence error: C++ - {cpp_sequence_offset}, Py - {python_sequence_offset}"
 print(f"Sequence: PASS - c++: {cpp_sequence_offset}, python: {python_sequence_offset}")
 
 print("PASS - all cpp & python conversion objects matched.")

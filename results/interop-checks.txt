@@ -1,4 +1,38 @@
+SC-03 verification — 2026-10-11 (America/New_York)
+PASS — C++20 build
+Command: clang++ -std=c++20 -dynamiclib cpp/probe.cpp -o cpp/libprobe.dylib
+Library: /Users/tyreefranklinjr/AttitudeGuard/cpp/libprobe.dylib
+
+Command: python tests/check_probe.py
 PASS — input 0.0: got 0.0, expected 0.0
 PASS — input -1.25: got -2.5, expected -2.5
 PASS — input 3.5: got 7.0, expected 7.0
 PASS - all three scalar checks
+PASS - all fields copied at time 0.0 s
+PASS - identical input produces identical fields at 0.0 s
+PASS - all fields copied at time 0.1 s
+PASS - identical input produces identical fields at 0.1 s
+PASS - all fields copied at time 0.2 s
+PASS - identical input produces identical fields at 0.2 s
+PASS — null input returns status 1
+PASS — null output returns status 1
+Size: PASS - c++: 40, python: 40
+Alignment: PASS - c++: 8, python: 8
+Time: PASS - c++: 0, python: 0
+Gyro: PASS - c++: 8, python: 8
+Sequence: PASS - c++: 32, python: 32
+PASS - all cpp & python conversion objects matched.
+PASS — tests/check_probe.py exit status 0
+
+Command: python sim/check_probe_callback.py
+Matplotlib is building the font cache; this may take a moment.
+PASS - callback time=0.000 s, input sequence=0, returned sequence=0
+PASS - callback time=0.100 s, input sequence=1, returned sequence=1
+PASS - callback time=0.200 s, input sequence=2, returned sequence=2
+PASS - callback time=0.300 s, input sequence=3, returned sequence=3
+PASS - callback time=0.400 s, input sequence=4, returned sequence=4
+PASS - callback time=0.500 s, input sequence=5, returned sequence=5
+PASS — Basilisk invoked all six callbacks from 0.0 through 0.5 s
+PASS — flight-software callback period is 0.1 s
+PASS — input sequences advance and returned sequences match
+PASS — sim/check_probe_callback.py exit status 0
